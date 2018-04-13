@@ -1,0 +1,54 @@
+#!/bin/bash
+# -*- mode:sh -*-
+
+# This must be done in two steps if the value is to be globally accessible:
+# comargs="--title=\"Using Common YAD Arguments\" --center --width=400 --text-align=center --buttons-layout=center --borders=10 --image=\"/usr/share/icons/Adwaita/48x48/emotes/face-cool.png\""
+
+comargs=(
+    --center --width=400
+    --text-align=center
+    --buttons-layout=center
+    --borders=10
+    --image="/usr/share/icons/Advaita/48x48/emotes/face-cool.png"
+)
+
+
+declare -x COMARGS=$( printf "%q " "${comargs[@]}" )
+echo "COMARGS = ${COMARGS}"
+
+
+gcomargs=( $( printf "%s " "${COMARGS}" ) )
+# echo "${#gcomargs[@]} elements in gcomargs"
+
+yad_message()
+{
+    msg="$1"
+    txt="value of msg: $1"
+    mapfile -t lcomargs < <( printf "%s" "${COMARGS}" | xargs -n 1 printf "%s\n" )
+    yad "${lcomargs[@]}" --text="$txt" --button="Done":1
+}
+
+
+cmdmain=(
+    yad
+    "${comargs[@]}"
+    --text="Click a link to see the demos."
+    --button="Exit":1
+    --form
+    --field="YAD Button Processing":btn "./yadbuttons"
+    --field="Show a message":btn "bash -c yad_message Hiya"
+)
+
+
+export -f yad_message
+
+while true; do
+    "${cmdmain[@]}"
+    exval=$?
+
+    case $exval in
+        1|252) break;;
+    esac
+done
+
+unset yad_message
