@@ -10,14 +10,6 @@ Although YAD can be used in other environments, I am using it with BASH.  Succes
 use of YAD requires use of some of the more subtle facilities of the BASH shell.  I will
 document my growing understanding of BASH techniques along with YAD.
 
-## External Documentation
-
-Typically, when I start writing documentation, I spend way too much time explaining
-fundamental concepts to support the topics about which I am writing.  I will try to
-avoid that trap in this document by including links online resources and trust that
-readers will take advantage of the links.  I will try to limit myself to talking about
-things I learn and only make references to the fundamentals.
-
 ## YAD Topics
 
 ### Useful Links
