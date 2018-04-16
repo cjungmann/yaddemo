@@ -14,8 +14,13 @@ document my growing understanding of BASH techniques along with YAD.
 
 ### Useful Links
 
-- The most complete reference is accessed by typing `man yad` in a console window.
-- [YAD project](https://sourceforge.net/projects/yad-dialog/)
+As I began exploring the limits of YAD, I depended on the following documentation for
+examples and explanations.
+
+- The YAD man page (`man yad`) is the most complete reference.  This quickly became
+  my most used reference as I exhausted limited range of examples in the other
+  sources.
+- [YAD Project Page](https://sourceforge.net/projects/yad-dialog/)
 - [The Buttons of YAD](http://www.thelinuxrain.com/articles/the-buttons-of-yad)
 - [Long YAD examples page](http://smokey01.com/yad/)
 - [Google Groups YAD forum](https://groups.google.com/forum/#!forum/yad-common)
@@ -26,71 +31,38 @@ If this project is extracted to a directory on a Linux computer, several sample
 scripts can be run to demonstrate how YAD works, and for examples for solving
 certain YAD programming problems.
 
-#### Script *main* To Start
+Running the *main* script provides access to the example scripts.  The buttons on
+*main*, and any subsidiary scripts, will match subsection headers under
+**YAD Progamming Topics** below.
+
+Access *main* by changing to the extracted *yaddemo* directory and typing `./main`.
 
 ~~~sh
-~/yaddemo $ ./main
+~/yaddemo$ ./main
 ~~~
-
-The *main* script is meant to provide convenient access to the various scripts.
-It contains a form dialog that contains several buttons that serve as links to
-the other scripts.  The buttons will be labelled to indicate various topics
-whose contents will be below in this guide.
 
 ### YAD Programming Topics
 
-- [YAD Button Processing](yadbuttons.md)
+This guide will cover several topics in using the YAD command to create simple
+GTK applications from a BASH script.  In places, this guide will simply provide an
+alternate explanation to those that already exist online.  The pages are written to
+preserve any new understanding I gain when I overcome my confusion in using YAD and
+BASH.
 
 ### YAD Button Processing
 
-Refer also to [The Buttons of YAD](http://www.thelinuxrain.com/articles/the-buttons-of-yad).
-I will be reference parts of this document to illustrate things, but, unfortunately,
-the document does not include internal links.  I will direct the reader to parts of the
-document with searchable strings rather than direct links.
+A GUI button is a widely-recognized metaphor for an object that causes something to happen.
+YAD allows buttons to be created at the bottom of a dialog and also as part of a form
+(a collection of data-entry items).
 
-There are two kinds of buttons in YAD, **dialog buttons** found at the bottom of a
-YAD dialog, and **form buttons** that can be added to a form dialog.  They behave
-differently, as described in the link above and my discussions below.
+Look at [YAD Button Processing](yadbuttons.md) for explanations that address various
+button-related issues.
 
-#### Dialog Buttons
+### YAD Dialog Formatting
 
-Standard dialog buttons terminate the dialog with an exit value that can be examined to
-determine which button was clicked.  The default buttons, *OK* and *Cancel*  set exit
-values of 0 and 1, respectively.
-
-##### Simplest Version: Default Buttons
-
-By default, a YAD dialog will have a *Cancel* and an *OK* button at the bottom.
-
-`$ yad --center --text="This is a YAD dialog"`
-
-![Simple Dialog](simple1.png)
-
-#### Custom Dialog Buttons
-
-Including any custom button will remove the default buttons.
-
-`$ yad --center --text="This is another YAD dialog" --button="Ok":10 --button="Exit":20`
-
-![Custom Dialog Buttons](simple2.png)
-
-#### Responding To Dialog Buttons
-
-The number that follows the button label will be the exit value when the button
-is pressed.
-
-~~~sh
-#!/bin/bash
-
-while true; do
-   --yad --text="This is another YAD dialog" --button="Ok":10 --button="Exit":20
-   exval=$?
-   case $exval in
-      10) echo "You pressed OK.";;
-      20|252) break;;
-   esac
-done
-~~~
+There are many formatting controls on the YAD dialog, and there is some formatting that
+is the result of the contents of the dialog.  [YAD Dialog Formatting](yadformatting.md)
+covers several topics associated with the look of YAD dialogs.
 
 ### Miscellaneous
 
