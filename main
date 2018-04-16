@@ -9,13 +9,12 @@ comargs=(
     --text-align=center
     --buttons-layout=center
     --borders=10
-    --image="/usr/share/icons/Advaita/48x48/emotes/face-cool.png"
+    # --image="/usr/share/icons/Advaita/48x48/emotes/face-cool.png"
+    --image="bogus-missing-image"
 )
 
 
 declare -x COMARGS=$( printf "%q " "${comargs[@]}" )
-echo "COMARGS = ${COMARGS}"
-
 
 gcomargs=( $( printf "%s " "${COMARGS}" ) )
 # echo "${#gcomargs[@]} elements in gcomargs"
@@ -28,6 +27,12 @@ yad_message()
     yad "${lcomargs[@]}" --text="$txt" --button="Done":1
 }
 
+open_utilities()
+{
+    cd utilities
+    ./utilities
+}
+
 
 cmdmain=(
     yad
@@ -36,11 +41,14 @@ cmdmain=(
     --button="Exit":1
     --form
     --field="YAD Button Processing":btn "./yadbuttons"
-    --field="Show a message":btn "bash -c yad_message Hiya"
+    --field="YAD Dialog Formatting":btn "./yadformatting"
+    --field="Utilities":btn "bash -c open_utilities"
+
 )
 
 
 export -f yad_message
+export -f open_utilities
 
 while true; do
     "${cmdmain[@]}"
@@ -51,4 +59,5 @@ while true; do
     esac
 done
 
+unset open_utilities
 unset yad_message
