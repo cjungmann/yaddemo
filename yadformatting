@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Get our common YAD args from the environment:
+declare -ax gcomargs=( $( printf "%s " "${COMARGS}" ) )
+
+yad_too_long()
+{
+    yad "${gcomargs[@]}" \
+        --text="\
+This is a very long string of words intended to stretch \
+the YAD dialog to an uncomfortable length.  Note that \
+in the BASH script file, the newlines are escaped-away \
+for easier reading, so the newlines do not exist in the \
+text string passed to YAD."
+}
+
+yad_just_right()
+{
+    yad "${gcomargs[@]}" \
+        --text="\
+This is a very long string of words intended to stretch 
+the YAD dialog to an uncomfortable length.  Note that 
+in the BASH script file, the newlines are left in place
+so the formatting of the text string can be compared to
+the formatting on the YAD dialog."
+}
+
+
+
+export -f yad_too_long
+export -f yad_just_right
+
+yad "${gcomargs[@]}" \
+    --form \
+    --field="YAD Too Long":btn "bash -c yad_too_long" \
+    --field="YAD Just Right":btn "bash -c yad_just_right"
+
+
+
+unset yad_just_right
+unset yad_too_long

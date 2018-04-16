@@ -1,0 +1,13 @@
+#!/bin/bash
+txt="\
+Browse these utilities for YAD programming ideas.
+Some utilities may also be useful in their own right."
+
+yad --title="Various YAD Utilities" \
+    --text="${txt}" \
+    --center --borders=10 \
+    --button="Exit":1 \
+    --form \
+    --field="GTK Stock Icon Browser":btn "bash -c ./icon-browser" \
+    --field="MySQL Browser":btn "bash -c './mysql-browser drill'" \
+    --field="MySQL Querier":btn "bash -c './mysql-browser query'"

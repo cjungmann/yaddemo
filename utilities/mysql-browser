@@ -1,0 +1,183 @@
+#!/bin/bash
+
+
+comargs=(
+    --width=500
+    --height=600
+    --center
+    --borders=20
+    --button="Done":1
+    )
+
+# Export for global access, leave as space-separated values
+declare -xa COMARGS=( $( printf "%q " "${comargs[@]}" ) )
+
+query_result_as_list()
+{
+    result="$1"
+
+    columns=( $( echo "${result}" | xsltproc --stringparam mode defs sql2yad.xsl - ) )
+    data=$( echo "${result}" | xsltproc sql2yad.xsl - )
+
+    barr=( "${COMARGS[@]}" "${columns[@]}" )
+
+    clines=$( for el in "${barr[@]}"; do printf "%s\n" "$el"; done )
+
+    echo "${clines}" "${data}" | xargs --delimiter=$'\n' 'yad' 
+}
+
+execute_query()
+{
+    query=$1
+
+    qcmd=(
+        mysql
+        --column-type-info
+        -tNB
+        -X
+        -e "${query}"
+    )
+
+    result=$( "${qcmd[@]}" )
+    exval=$?
+
+    case $exval in
+        0) query_result_as_list "${result}" ;;
+        1) echo "Error: ${result}" ;;
+        *) echo "Unanticipated exit value: $exval"
+    esac
+}
+
+show_databases()
+{
+    local cmd=(
+        yad
+        "${COMARGS[@]}"
+        --title="Browse Databases"
+        --list
+        --column="Database Name":TXT
+        $( mysql -BN -e show\ databases )
+    )
+
+    while true; do
+        result=$( "${cmd[@]}" )
+        exval=$?
+        case $exval in
+            1|252) break;;
+            *) show_tables "${result%|}"
+        esac
+    done
+}
+
+
+show_tables()
+{
+    dbname=$1
+
+    local cmd=(
+        yad
+        "${COMARGS[@]}"
+        --title="Browse Tables in ${dbname}"
+        --list
+        --column="Table Name":TXT
+        $( mysql -BN ${dbname} -e show\ tables )
+    )
+
+    while true; do
+        result=$( "${cmd[@]}" )
+        exval=$?
+        case $exval in
+            1|252) break;;
+            *) show_fields "${dbname}" "${result%|}"
+        esac
+    done
+}
+
+parse_sql_result()
+{
+    qresult="$1"
+    OIFS=$IFS
+    IFS=$'\t'
+    printf "%s\n" ${qresult}
+    IFS=$OIFS
+}
+
+show_fields()
+{
+    dbname=$1
+    tname=$2
+
+    query="\
+SELECT COLUMN_NAME, COLUMN_TYPE
+  FROM COLUMNS
+ WHERE TABLE_SCHEMA=\"${dbname}\"
+   AND TABLE_NAME=\"${tname}\""
+
+    qresult=$( mysql -BN information_schema -e "${query}" )
+    qlines=$(parse_sql_result "${qresult}")
+    IFS=$'\n' qarr=( ${qlines} )
+
+    local cmd=(
+        yad
+        "${COMARGS[@]}"
+        --title="Browse fields of table ${table} in database ${dbname}"
+        --list
+        --column="Field Name":TXT
+        --column="Data Type":TXT
+        "${qarr[@]}"
+    )
+
+
+    while true; do
+        result=$( "${cmd[@]}" )
+        exval=$?
+        case $exval in
+            1|252) break;;
+        esac
+    done
+}
+
+run_query()
+{
+    local cmdquery=(
+        yad
+        --button="Execute":0
+        "${COMARGS[@]}"
+        --text="Type a query, then EXECUTE to process, DONE to quit"
+        --entry
+    )
+
+    while true; do
+        query=$( "${cmdquery[@]}" )
+        exval=$?
+        case $exval in
+            1|252) break;;
+            0) execute_query "${query}" ;;
+        esac
+    done
+}
+
+
+export -f query_result_as_list
+export -f execute_query
+export -f show_databases
+export -f show_tables
+export -f parse_sql_result
+export -f show_fields
+export -f run_query
+
+selected=$1
+
+case $selected in
+    query) run_query ;;
+    drill) show_databases ;;
+    ex) execute_query "SELECT * FROM MenuOrder.Day LIMIT 3"
+esac
+
+unset run_query
+unset show_fields
+unset parse_sql_result
+unset show_tables
+unset show_databases
+unset execute_query
+unset query_result_as_list

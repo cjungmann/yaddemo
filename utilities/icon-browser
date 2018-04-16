@@ -1,0 +1,47 @@
+#!/bin/bash
+
+get_path_gtk_includes()
+{
+    path_gtk_h=$( locate gtk/gtk.h )
+    path_gtk="${path_gtk_h%'gtk.h'}"
+    echo ${path_gtk}
+}
+
+get_duped_icons()
+{
+    path=$(get_path_gtk_includes)
+    slines=$( grep "#define GTK_STOCK" "${path}gtkstock.h" | grep -P -o '(?<=\")[^\"]+' - )
+    sels=( ${slines} )
+
+    for name in "${sels[@]}"; do
+        echo "$name $name "
+    done
+}
+
+show_stock_icons()
+{
+    dups=$( get_duped_icons )
+    dupels=( $dups )
+
+    cmd=(
+        yad
+        --width=300 --height=600
+        --title="List of GTK Stock Icons"
+        --icon=bogus
+    )
+
+    yad \
+        --title="GTK Icon Browser" \
+        --text="\
+Many stock items may be missing.  The
+missing icons will match the dialog icon." \
+        --center --borders=10 \
+        --height=600 \
+        --list \
+        --column="Image":IMG \
+        --column="Name":TXT \
+        $dups
+}
+
+show_stock_icons
+
