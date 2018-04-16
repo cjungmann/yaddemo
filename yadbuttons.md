@@ -32,6 +32,11 @@ contains all the functions and YAD commands mentioned in this guide.  The dialog
 run by clicking the buttons, or studied by opening the script file in a browser (from
 github) or a text editor.
 
+## Dialog Buttons
+
+Run these examples from `./yadbuttons` or clicking the **YAD Button Processing** button
+when running the `./main` script
+
 ### Simple Dialog: function simple_dialog()
 The simplest YAD dialog with no options, will include two default buttons.
 
@@ -124,3 +129,9 @@ numerous or too long.  Consider the following dialog:
 
 ![too_many_dialog_buttons](too_many_dialog_buttons.png)
 
+## Form Buttons
+
+Form buttons are more flexible in presentation, but can only run a command.  Despite some
+effort in the attempt, I was not able to get a form button to terminate a dialog.
+
+Form buttons are `--field` options under a `--form`.  
