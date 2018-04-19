@@ -39,7 +39,7 @@
   </xsl:template>
 
   <xsl:template match="field" mode="write_data">
-    <xsl:value-of select="concat($fs,$quot,.,$quot)" />
+    <xsl:value-of select="concat($quot,.,$quot,$fs)" />
     <!-- <xsl:value-of select="concat($fs,.)" /> -->
   </xsl:template>
 
