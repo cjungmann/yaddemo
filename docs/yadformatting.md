@@ -3,6 +3,13 @@
 There is nothing in this guide that cannot be easily discovered with some experimentation,
 but showing some examples will save some time.
 
+## Centering the Dialog
+
+It is easier for the user to find the dialog if it's always in the same place.  Using the
+`--center` option directs YAD to create the new dialog in the center of the window.
+
+- *main* -> *YAD Dialog Formatting* -> *YAD Centered*
+
 ## Dialog Width
 
 The width of a dialog is, initially, determined by the width of certain elements of the
@@ -23,10 +30,12 @@ The dialog will expand horizontally to contain the contents of the `--text` opti
 If the text is set to a very long string without any newlines, the dialog will be rendered
 wide enough to contain the text.
 
-**Use newlines in --text options to create a pleasing format.**
+The `--width` option overrides the text width, so a single long line of text will be broken
+to fit within the width request.
 
 Find the examples of a long text option, with and without incorporated newlines, at
 - *main* -> *YAD Dialog Formatting* -> *YAD Too Long*, and
+- *main* -> *YAD Dialog Formatting* -> *YAD Width-restrained Too Long*, and
 - *main* -> *YAD Dialog Formatting* -> *YAD Just Right*.
 
 ## YAD Borders
@@ -37,4 +46,4 @@ like the CSS *padding* property.
 
 Find an example of the formatted text dialog with borders to make a nicer dialog:
 
-- *main* -> *YAD Dialog Formatting* -> *YAD Just Right, Loosened*
+- *main* -> *YAD Dialog Formatting* -> *YAD Just Right and Loosened*
