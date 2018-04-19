@@ -1,21 +1,58 @@
 # YAD (and BASH) Demo
 
-The script files in this project preserve techniques I employ to take advantage of the
-[YAD](https://sourceforge.net/projects/yad-dialog/) dialog tool.  During development,
-the script files will serve as code sandboxes in which I will experiment with different
-ideas.  Once I get things working, I will document how I solved certain problems and
-the insight I gained.
+I have recently begun to explore the possibilities of the
+[YAD (**y**et **a**nother **d**ialog)](https://sourceforge.net/projects/yad-dialog/)
+dialog tool.  It seems to be the best tool (relatively easy to learn and use) for
+creating a user interface for a Linux script.  This project will be a place for me
+to save working BASH scripts that use YAD and to document how I solve problems.
 
 Although YAD can be used in other environments, I am using it with BASH.  Successful
 use of YAD requires use of some of the more subtle facilities of the BASH shell.  I will
 document my growing understanding of BASH techniques along with YAD.
 
+## YAD Scripts
+
+This repository contains both BASH scripts and Markdown documents.  The scripts can be
+run directly, or accessed through the `main` script.  To make it easier to find the
+examples, the `main` script shows buttons labelled after the topics below.
+
+Run the main script from a console window:
+
+~~~sh
+me:~/yaddemo$ ./main
+~~~
+
 ## YAD Topics
 
-### Useful Links
+### YAD Button Processing
 
-As I began exploring the limits of YAD, I depended on the following documentation for
-examples and explanations.
+[YAD Button Processing](docs/yadbuttons.md)
+
+A GUI button is a widely-recognized metaphor for a physical push button as a tool
+to initiate an action.  YAD includes options for creating and manipulating buttons
+on the dialog and as parts of forms.
+
+### YAD Formatting
+
+[YAD Formatting](docs/yadformatting.md)
+
+YAD provides several options for changing the appearance of the dialogs.  This topic
+will cover a growing subset of these options as I find uses for them.
+
+### YAD Utilities
+
+[YAD Utilities](docs/yadutilities.md)
+
+I have included a few BASH utilties that use YAD as the user interface.  They might
+be useful as examples for using YAD in a larger context.
+
+Unlike other YAD-using BASH scripts, the utility scripts reside in a `utilities`
+directory.
+
+### External YAD Resources
+
+As I began exploring the limits of YAD, I found the following documentation useful as
+a source of examples and explanations.
 
 - The YAD man page (`man yad`) is the most complete reference.  This quickly became
   my most used reference as I exhausted limited range of examples in the other
@@ -24,45 +61,6 @@ examples and explanations.
 - [The Buttons of YAD](http://www.thelinuxrain.com/articles/the-buttons-of-yad)
 - [Long YAD examples page](http://smokey01.com/yad/)
 - [Google Groups YAD forum](https://groups.google.com/forum/#!forum/yad-common)
-
-### Example YAD Scripts
-
-If this project is extracted to a directory on a Linux computer, several sample
-scripts can be run to demonstrate how YAD works, and for examples for solving
-certain YAD programming problems.
-
-Running the *main* script provides access to the example scripts.  The buttons on
-*main*, and any subsidiary scripts, will match subsection headers under
-**YAD Progamming Topics** below.
-
-Access *main* by changing to the extracted *yaddemo* directory and typing `./main`.
-
-~~~sh
-~/yaddemo$ ./main
-~~~
-
-### YAD Programming Topics
-
-This guide will cover several topics in using the YAD command to create simple
-GTK applications from a BASH script.  In places, this guide will simply provide an
-alternate explanation to those that already exist online.  The pages are written to
-preserve any new understanding I gain when I overcome my confusion in using YAD and
-BASH.
-
-### YAD Button Processing
-
-A GUI button is a widely-recognized metaphor for an object that causes something to happen.
-YAD allows buttons to be created at the bottom of a dialog and also as part of a form
-(a collection of data-entry items).
-
-Look at [YAD Button Processing](yadbuttons.md) for explanations that address various
-button-related issues.
-
-### YAD Dialog Formatting
-
-There are many formatting controls on the YAD dialog, and there is some formatting that
-is the result of the contents of the dialog.  [YAD Dialog Formatting](yadformatting.md)
-covers several topics associated with the look of YAD dialogs.
 
 ### Miscellaneous
 
