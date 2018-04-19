@@ -1,5 +1,17 @@
 #!/bin/bash
 
+stringify_array()
+{
+    ansi_c_quote=$'$\''   #' Commented apostrophe to fix EMACS string highlighting
+    for el in "$@"; do
+        if [ "${el:0:2}" = "${ansi_c_quote}" ]; then
+            echo "${el:2:-1}";
+        else
+            echo "${el}";
+        fi;
+    done
+}
+
 
 comargs=(
     --width=500
@@ -17,13 +29,9 @@ query_result_as_list()
     result="$1"
 
     columns=( $( echo "${result}" | xsltproc --stringparam mode defs sql2yad.xsl - ) )
-    data=$( echo "${result}" | xsltproc sql2yad.xsl - )
-
     barr=( "${COMARGS[@]}" "${columns[@]}" )
 
-    clines=$( for el in "${barr[@]}"; do printf "%s\n" "$el"; done )
-
-    echo "${clines}" "${data}" | xargs --delimiter=$'\n' 'yad' 
+    result=$( echo "${result}" | xsltproc sql2yad.xsl - | yad "${barr[@]}" )
 }
 
 execute_query()
@@ -157,7 +165,7 @@ run_query()
     done
 }
 
-
+export -f stringify_array
 export -f query_result_as_list
 export -f execute_query
 export -f show_databases
@@ -181,3 +189,4 @@ unset show_tables
 unset show_databases
 unset execute_query
 unset query_result_as_list
+unset stringify_array
