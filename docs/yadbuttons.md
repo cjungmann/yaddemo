@@ -7,17 +7,17 @@ differently and are hosted in different parts of a YAD dialog.
 
 ### Dialog Buttons
 
-- Arrayed along the bottom of the dialog
-- Included by default (can be added to, changed, or omitted)
-- Terminate the dialog (can call command instead)
-- Signal the calling function through the exit value
+- are arrayed along the bottom of the dialog
+- are included by default (can be added to, changed, or omitted)
+- terminate the dialog (can call command instead)
+- signal the calling function through the exit value
 
 ### Form Buttons
 
-- Positioned vertically in line with other form elements
-- Must be explicitly included
-- Always call another function
-- Never terminate the YAD dialog
+- are positioned vertically in line with other form elements
+- must be explicitly included
+- always call another function
+- never terminate the YAD dialog (I tried to make it do this).
 
 For questions not answered in this guide, refer also to
 [The Buttons of YAD](http://www.thelinuxrain.com/articles/the-buttons-of-yad)
@@ -84,6 +84,21 @@ export -f announce
 unset announce
 ~~~
 
+
+## Using *bash -c*
+
+I created this section as a placeholder for an article that finally helped me understand the
+proper usage of the `bash -c` often used to run button commands.  I intend to revisit this
+section when I have had some practice using it, and then I will use my own words to explain.
+
+I found [this article](https://unix.stackexchange.com/questions/144514/add-arguments-to-bash-c)
+that finally explained it use in a way I understand.
+
+Form buttons must, and dialog buttons can, include a command string that performs the desired
+action.  This is often done by invoking a new command interpreter, especially `bash -c`.  The
+syntax rules of `bash -c` are not obvious, or at least I must admit that I didn't understand
+how to use it.
+
 #### Command Array
 
 YAD commands start to get very long as more and more options are used to define a dialog.
@@ -114,7 +129,7 @@ function in the *yadbuttons* script.)  Looking at the buttons in order:
 - **Browser** button attempts to open an instance of the *firefox* browser.  The dialog remains
   open.
 - **Announce** button calls a local function called `announce`, leaving the dialog open.  Notice
-  the `export -f announce`  command that preceeds the YAD invocation `"${cmd[@]}"`.  YAD cannot
+  the `export -f announce` command that precedes the YAD invocation `"${cmd[@]}"`.  YAD cannot
   access an internal script function unless it has been exported.  It is a good practice to
   `unset` the function name when it is no longer needed.  Otherwise, the function will remain
   available even after the script has terminated.
