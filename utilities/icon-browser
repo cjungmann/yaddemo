@@ -18,30 +18,18 @@ get_duped_icons()
     done
 }
 
-show_stock_icons()
-{
-    dups=$( get_duped_icons )
-    dupels=( $dups )
+dups=$( get_duped_icons )
+dupels=( $dups )
 
-    cmd=(
-        yad
-        --width=300 --height=600
-        --title="List of GTK Stock Icons"
-        --icon=bogus
-    )
-
-    yad \
-        --title="GTK Icon Browser" \
-        --text="\
+yad \
+    --title="GTK Icon Browser" \
+    --text="\
 Many stock items may be missing.  The
 missing icons will match the dialog icon." \
-        --center --borders=10 \
-        --height=600 \
-        --list \
-        --column="Image":IMG \
-        --column="Name":TXT \
-        $dups
-}
-
-show_stock_icons
+    --center --borders=10 \
+    --height=600 \
+    --list \
+    --column="Image":IMG \
+    --column="Name":TXT \
+    $dups
 
