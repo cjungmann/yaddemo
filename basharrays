@@ -1,0 +1,64 @@
+#!/bin/bash
+
+comargs=(
+    --center
+    --borders=10
+    --title="Exploring BASH Arrays"
+    --text="\
+This long text string is included in order to test and demonstrate
+how an inconvenient array a multi-line string can be safely saved
+and restored.  Including a text option after the comargs array will
+override this default text."
+    --button="Done":1
+)
+
+
+# Using the 'bell' character as the element delimiter:
+COMARGS=$( printf "%s\a" "${comargs[@]}" )
+
+
+using_exported()
+{
+    IFS=$'\a' lcomargs=( $COMARGS )
+    echo "lcomargs has ${#lcomargs[@]} arguments:"
+    printf "'%s'\n" "${lcomargs[@]}"
+}
+
+
+
+
+
+cmd=(
+    "${comargs[@]}"
+    --fixed
+    --text="\
+This text replaces the long default text.  The text option is part of a new array that begins
+with the contents of the previous array.  We used the extended array to generate the dialog.
+
+Also, if you look at the script, you will see that this YAD dialog is at a global scope within
+the script, so it can use the comargs array directly.  Other examples that follow will be YAD
+calls to exported functions, which will be in a different scope and thus unable to access comargs.
+For these dialogs, we'll have to export the array and reconstruct it before using it.
+
+Also note that the --fixed option is included in the YAD command to prevent the excessive height
+of the dialog."
+)
+
+yad "${cmd[@]}"
+
+cmdf=(
+    "${comargs[@]}"
+    --text="\
+Calling a function in the same script, exported to make
+it available to YAD."
+    --form
+    --field="Call Exported Internal Function":BTN "bash -c using_exported"
+)
+
+export COMARGS
+export -f using_exported
+
+yad "${cmdf[@]}"
+
+unset using_exported
+unset COMARGS

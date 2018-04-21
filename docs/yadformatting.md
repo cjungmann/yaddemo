@@ -38,6 +38,16 @@ Find the examples of a long text option, with and without incorporated newlines,
 - *main* -> *YAD Dialog Formatting* -> *YAD Width-restrained Too Long*, and
 - *main* -> *YAD Dialog Formatting* -> *YAD Just Right*.
 
+## Dialog Height
+
+For some reason, when the `--text` option string is very long, the YAD dialog gets very tall,
+many times taller than necessary to contain the text.  Even setting the `--height` fails to
+overcome this unfortunate formatting problem.
+
+Setting the `--fixed` option seems to help with this.  With a long `--text` string, setting
+`--fixed` will honor the `--height` option, or simple size the dialog to fit the long text.
+
+
 ## YAD Borders
 
 I had expected the `--borders` option to create a thick border around the dialog, but, instead,

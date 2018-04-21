@@ -16,9 +16,13 @@ yad --center \
     --borders=10 \
     --width=500 \
     --height=600 \
-    --title="BASH Array Demonstration" \
-    --text="We created this dialog with directly-applied options" \
-    --button="Done":1
+    --title="Exploring BASH Arrays" \
+    --button="Done":1 \
+    --text="\
+This invocation of YAD is all on one command line, despite the \
+fact that it shows as several lines in the script.  Escaping the \
+newlines removes them to, despite appearances, form a single line."
+
 
 # Create an array of YAD options:
 cmd=(
@@ -26,13 +30,12 @@ cmd=(
    --borders=10
    --width=500
    --height=600    
-   --title="BASH Array Demonstration"
-   --text="We used an array to invoke YAD with options."
+   --title="Exploring BASH Arrays" 
    --button="Done":1
 )
 
 # Second method: Invoke YAD, supplying the options by expanding the array:
-yad "${cmd[@]}"
+yad "${cmd[@]}" --text="This invocation of YAD"
 ~~~
 
 BASH executes a command when it encounters a newline, so commands cannot extend to a second
@@ -48,6 +51,9 @@ the newline.  In either of these cases, the command will not receive the options
 follow the unescaped newline.  Compounding the problem, there may be no obvious errors in
 the dialog resulting from the incomplete command.  Invisible errors and symptoms make for
 difficult debugging.
+
+### Advantages of Using Arrays
+
 
 ### The Problem with Arrays
 
