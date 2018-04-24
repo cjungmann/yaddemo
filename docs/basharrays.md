@@ -17,29 +17,61 @@ following screen print to see how different syntax results in different outcomes
 will use `printf "'%s'\n"` to show the results of each string substitution.  Using `printf` this
 way will separate the elements makes it easier to see what an array element begins and ends.
 
+### Reproducing the Document Images
+
+This repository includes the file `docs/array_scripts.sh` that was used to create the images
+found below.  Run the script to create an anonymous console window (ie without user or computer
+names) and a `gedit` window with the array_scripts.sh file.   Copy code fragments from the `gedit`
+window to the console to run them (copy from gedit with Control-C, then paste into the console
+with Shift-Insert).  Type Alt-PrScr to copy a snapshot of the console window to your copy
+buffer.
+
 ### Experiments Converting a String to an Array
 
 This set of experiments will create a string with three elements.  Different handling of the
 string will result in differnt outcomes, as will be illustrated below.
 
+Each experiment will show the count of array elements with `echo "arr has ${#arr[@]} elements"`.
+Then it will show the elements themselves  with `printf "'%s'\n" "${arr[@]}"` so that
+the apostrophes clearly mark the beginning and end of an array element which may include
+newlines that would otherwise be ambiguous.
+
 #### Create and View the String
+
+This first image mainly establishes the contents of the array string.  It includes three
+items to create a YAD dialog.  The following experiments will change the construction of
+the string and the array.
+
 ![elements in a string](img1.png)
 
 #### Create Array from String, Quoted Substitution
+In this experiment, we begin to use the *array initialization* parentheses with a quoted
+variable invocation.  It does not work as we want:
+
 ![quoted substitution yields too few array elements](img2.png)
+
 You can see that the array only has a single element, not the three we were hoping for.
-The problem in this case is that we attempted to create the array from the quoted variable
-substitution `arr=( "${str}" )`.  Enclosing the name with quotes forces BASH to treat the
-entire string as a single value.
+Enclosing the variable name with quotes, `arr=( "${str}" )`, forces BASH to treat the
+entire string as a single value, thus a single array element.
 
 #### Create Array from String, Unquoted Substitution
+
+In this experiment, we properly leave off the quotes, and BASH dutifully breaks the
+string into discrete elements:
+
 ![unquoted substitution yields too many array elements](img3.png)
+
 Using the unquoted substitution, `arr=( ${str} )` results in too many array elements.
 The problem is that BASH is breaking the string on white-space characters, specifically
 any space, tab, or newline is taken to signal the beginning of a new element.  Even though
 the text strings are enclosed in single-quotes, the enclosed spaces trigger new elements.
 
 #### Setting IFS Value for Better Breaks
+
+Allowing BASH to break the string by spaces, tabs, or newlines is too permissive because
+it causes too many breaks.  This experiment introduces newlines into the array source
+string, then breaks the array *only* on the newlines:
+
 ![unquoted substitution with newlines and IFS](img4.png)
 This is the desired result, an array with three elements.
 
@@ -55,78 +87,31 @@ array substitution, the IFS value reverts to the its previous setting when the s
 is finished.
 
 #### Omitting Value String Quotes
-![with newlines field separators, quotes are not needed for string values](img5.png)
 Having removed spaces from the list of field separators, we no longer need to use quotes
-to keep the sentences together.  
+to keep the sentences together:
 
+![with newlines field separators, quotes are not needed for string values](img5.png)
 
+This may not be array nirvana, however, depending on how the array elements are used.
+The above array works for YAD, but may not work if the target command needs to further break
+down the elements because the `--title=YAD Dialog` might be broken into two items,
+`title=YAD` and `Dialog`.  In that case, you may have to continue quoting the string.
 
+### Alternate Array Initializations
 
+Besides the `( )` array initialization, BASH has built-in commands that can also create
+arrays when the parentheses fall short.  Find these commands in `man bash`, slash-search
+for `^SHELL BUILTIN COMMAND`, then from there search for the command.
 
-some of the
-~~~sh
-cmd=(
-   yad
-   --title="YAD Dialog"
-   --text="Behold this YAD dialog and be amazed."
-)
-~~~
+#### Using *mapfile*
 
-**mapfile** / **readarray** constructs an array from *stdin*.  Creating arrays with this command
-is more complicated, but may be called-for if one of the **mapfile** options serve your purposes.
-While this function is meant to create an array from a file, this example will simluate a file
-by echoing a string that includes newlines.  Notice three 
+The commands **mapfile** and **readarray** are actually aliases for the same function that
+builds and array from a string or a file.  The main advantage the **mapfile** holds is the
+options available tweak the construction.  As shown below, **mapfile** is also more forgiving
+with the input data, returning the same array whether the string is multi-line or single-line,
+and whether the variable is quoted or not.
 
-~~~sh
-me:~$ fakefile="yad
-> --title='YAD Dialog'
-> --text='Behold this YAD dialog and be amazed.'"
-me:~$ echo $fakefile | readarray cmd
-me:~$ printf "'%s'\n" "${cmd[@]}"
-''
-me:~$ readarray cmd < <( echo $fakefile )
-me:~$ printf "'%s'\n" "${cmd[@]}"
-'yad --title='YAD Dialog' --text='Behold this YAD dialog and be amazed.'
-'
-me:~$ readarray cmd < <( echo "${fakefile}" )
-me:~$ printf "'%s'\n" "${cmd[@]}"
-'yad
-'
-'--title='YAD Dialog'
-'
-'--text='Behold this YAD dialog and be amazed.'
-'
-me:~$ readarray -t cmd < <( echo "${cmdstr}" )
-me:~$ printf "'%s'\n" "${cmd[@]}"
-'yad'
-'--title='YAD Dialog''
-'--text='Behold this YAD dialog and be amazed.''
-me:~$ 
+![mapfile examples](img6.png)
 
+Find documentation for *mapfile* and *readarray* in `man bash`.
 
-
-
-
-
-
-
-me:~/yaddemo$ cmdstr="yad
-> --title='YAD Dialog'
-> --text='Behold this YAD dialog and be amazed'"
-me:~/yaddemo$ echo $cmdstr | readarray cmd
-me:~/yaddemo$ echo "${cmd[@]}"
-
-me:~/yaddemo$ readarray cmd < <( echo $cmdstr )
-me:~/yaddemo$ echo "${cmd[@]}"
-yad --title='YAD Dialog' --text='Behold this YAD dialog and be amazed'
-
-
-
-
-cmdstr="yad
---title='YAD Dialog
---text='Behold this YAD dialog and be amazed.'"
-
-
-mapfile cmd < <( echo $cmdstr )
-~~~

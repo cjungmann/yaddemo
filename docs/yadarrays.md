@@ -1,4 +1,4 @@
-# BASH Arrays
+# YAD Arrays
 
 I often invoke YAD with the options in an indexed array.   It's nicer to look at an
 array than an extended line with escaped newlines.  I also use an array to collect
@@ -53,6 +53,44 @@ the dialog resulting from the incomplete command.  Invisible errors and symptoms
 difficult debugging.
 
 ### Advantages of Using Arrays
+
+Besides being easier to read array-formatted command lines, it's also easier to combine
+multiple arrays or to temporarily comment out individual options.
+
+~~~sh
+cmd=(
+    # --text="Please fill out the following survey for a prize."
+    --text="Our legal department advised against asking for a birthdate."
+    --form
+    --field="First Name" ""
+    --field="Last Name" ""
+    # --field="Birthday":DT "1960/04/21"
+    --button="Done":1
+)
+~~~
+
+![commenting_array_elements](commenting_array_elements.png)
+
+Notice how commenting the first of the text options did not prevent the reading of the following
+options.  If we had created a long line by escaping newlines, the options following the first
+commented newline would be ignored:
+
+~~~sh
+yad \
+    --title="Commenting Escaped Newlines" \
+    # --text="Please fill out the following survey for a prize." \
+    --text="Our legal department advised against asking for a birthdate." \
+    --form \
+    --field="First Name" "" \
+    --field="Last Name" "" \
+    # --field="Birthday":DT "1960/04/21" \
+    --button="Done":1
+~~~
+
+![commenting_escaped_newlines](commenting_escaped_newlines.png)
+
+Notice that the options that follow the commented text are lost.  No longer explicitely calling
+for a **Done** button, YAD falls back to the default **Cancel** and **OK** buttons.
 
 
 ### The Problem with Arrays
