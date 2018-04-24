@@ -1,22 +1,47 @@
 #!/bin/bash
 
-# Get our common YAD args from the environment:
-declare -ax gcomargs=( $( printf "%s " "${COMARGS}" ) )
+yad_centered()
+{
+    yad --center --text="This dialog is displayed in the center of the screen."
+}
 
 yad_too_long()
 {
-    yad "${gcomargs[@]}" \
-        --text="\
+    yad --center --text="\
 This is a very long string of words intended to stretch \
 the YAD dialog to an uncomfortable length.  Note that \
 in the BASH script file, the newlines are escaped-away \
-for easier reading, so the newlines do not exist in the \
-text string passed to YAD."
+for easier reading of the code.  However, while that is \
+a necessary practice to ensure a yad command, for example \
+is on one line, removing the newlines in a character \
+string makes for a very long line of text."
+}
+
+yad_width_too_long()
+{
+    yad --center --width=500 --text="\
+This is a very long string of words intended to stretch \
+the YAD dialog to an uncomfortable length.  Note that \
+in the BASH script file, the newlines are escaped-away \
+for easier reading of the code.  However, while that is \
+a necessary practice to ensure a yad command, for example \
+is on one line, removing the newlines in a character \
+string makes for a very long line of text."
 }
 
 yad_just_right()
 {
-    yad "${gcomargs[@]}" \
+    yad --center --text="\
+This is a very long string of words intended to stretch 
+the YAD dialog to an uncomfortable length.  Note that 
+in the BASH script file, the newlines are left in place
+so the formatting of the text string can be compared to
+the formatting on the YAD dialog."
+}
+
+yad_just_right_loosened()
+{
+    yad --center --borders=20 \
         --text="\
 This is a very long string of words intended to stretch 
 the YAD dialog to an uncomfortable length.  Note that 
@@ -25,17 +50,39 @@ so the formatting of the text string can be compared to
 the formatting on the YAD dialog."
 }
 
+yad_use_icon()
+{
+    comargs=( ${COMARGS} )
+    yad "${comargs[@]}" \
+        --text "This text will be inserted into the text option" \
+        --image "gtk-dialog-info" \
+        --button="View Stock Icons":"bash -c utilities/icon-browser"
+}
 
 
+export -f yad_centered
 export -f yad_too_long
+export -f yad_width_too_long
 export -f yad_just_right
+export -f yad_just_right_loosened
+export -f yad_use_icon
 
-yad "${gcomargs[@]}" \
+
+comargs=( ${COMARGS} )
+
+yad "${comargs[@]}" \
+    --text="Click a link below to see the example" \
     --form \
+    --field="YAD Centered":btn "bash -c yad_centered" \
     --field="YAD Too Long":btn "bash -c yad_too_long" \
-    --field="YAD Just Right":btn "bash -c yad_just_right"
+    --field="YAD Width-restricted Too Long":btn "bash -c yad_width_too_long" \
+    --field="YAD Just Right":btn "bash -c yad_just_right" \
+    --field="YAD Just Right and Loosened":btn "bash -c yad_just_right_loosened" \
+    --field="YAD Use Icon":btn "bash -c yad_use_icon"
 
-
-
+unset yad_use_icon
+unset yad_just_right_loosened
 unset yad_just_right
+unset yad_width_too_long
 unset yad_too_long
+unset yad_centered

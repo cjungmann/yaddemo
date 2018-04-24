@@ -24,10 +24,49 @@ using_exported()
     printf "'%s'\n" "${lcomargs[@]}"
 }
 
+combining_arrays()
+{
+    IFS=$'\a' lcomargs=( $COMARGS )
+    form_cmd=(
+        --text="Complete the following form to get a prize."
+        --form
+        --field="Birthday":DT "1960/04/21"
+        --field="First Name" ""
+        --field="Last Name" ""
+    )
 
+    yad "${lcomargs[@]}" "${form_cmd[@]}"
+}
 
+commenting_array_elements()
+{
+    cmd=(
+        --title="Commenting Array Elements"
+        # --text="Please fill out the following survey for a prize."
+        --text="Our legal department advised against asking for a birthdate."
+        --form
+        --field="First Name" ""
+        --field="Last Name" ""
+        # --field="Birthday":DT "1960/04/21"
+        --button="Done":1
+    )
 
+    yad "${cmd[@]}"
+}
 
+commenting_escaped_newlines()
+{
+    yad \
+        --title="Commenting Escaped Newlines" \
+        # --text="Please fill out the following survey for a prize." \
+        --text="Our legal department advised against asking for a birthdate." \
+        --form \
+        --field="First Name" "" \
+        --field="Last Name" "" \
+        # --field="Birthday":DT "1960/04/21" \
+        --button="Done":1
+}
+   
 cmd=(
     "${comargs[@]}"
     --fixed
@@ -53,12 +92,21 @@ Calling a function in the same script, exported to make
 it available to YAD."
     --form
     --field="Call Exported Internal Function":BTN "bash -c using_exported"
+    --field="Combining Arrays":BTN "bash -c combining_arrays"
+    --field="Commenting Array Elements":BTN "bash -c commenting_array_elements"
+    --field="Commenting Escaped Newlines":BTN "bash -c commenting_escaped_newlines"
 )
 
 export COMARGS
 export -f using_exported
+export -f combining_arrays
+export -f commenting_array_elements
+export -f commenting_escaped_newlines
 
 yad "${cmdf[@]}"
 
+unset commenting_escaped_newlines
+unset commenting_array_elements
+unset combining_arrays
 unset using_exported
 unset COMARGS
