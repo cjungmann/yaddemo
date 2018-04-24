@@ -106,8 +106,8 @@ for `^SHELL BUILTIN COMMAND`, then from there search for the command.
 #### Using *mapfile*
 
 The commands **mapfile** and **readarray** are actually aliases for the same function that
-builds and array from a string or a file.  The main advantage the **mapfile** holds is the
-options available tweak the construction.  As shown below, **mapfile** is also more forgiving
+builds an array from a string or a file.  The main advantage the **mapfile** offers is the
+options available to tweak construction.  As shown below, **mapfile** is also more forgiving
 with the input data, returning the same array whether the string is multi-line or single-line,
 and whether the variable is quoted or not.
 
