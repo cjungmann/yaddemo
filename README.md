@@ -49,18 +49,27 @@ be useful as examples for using YAD in a larger context.
 Unlike other YAD-using BASH scripts, the utility scripts reside in a `utilities`
 directory.
 
-### BASH Arrays
+### YAD Arrays
 
-[BASH Arrays](docs/basharrays.md)
+[YAD Arrays](docs/yadarrays.md)
 
 I often invoke YAD with the options in an indexed array.   It's nicer to look at an
 array than an extended line with escaped newlines.  I also use an array to collect
 common YAD options to facilitate a constant look among the YAD dialogs in an 
 application.
 
-The challenge with sharing arrays among BASH scripts and exported functions is that
-BASH cannot save an array to an environment variable.  The [BASH Arrays](docs/basharrays.md)
-guide shows how I solved this problem.
+### BASH Arrays
+
+[BASH Arrays](docs/basharrays.md)
+
+If you embrace the recommendations in the [YAD Arrays](docs/yadarrays.md) page, you may
+benefit from a further discussion on the use of arrays in BASH.  People familiar with
+other programming languages will be suprised by the syntax and mechanics of BASH arrays
+and variable expansions.
+
+Besides having an introduction to the syntax differences with using BASH variables, this
+page will talk about the why BASH cannot save arrays in an environment variable and will
+present one successful method for saving and restoring BASH arrays variables.
 
 ### External YAD Resources
 
