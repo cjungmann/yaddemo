@@ -1,5 +1,11 @@
 # BASH Arrays
 
+The original purpose of this page was to explain problems with
+[saving and restoring BASH arrays](#saving-and-restoring-arrays).
+This topic now follows sections on methods for creating arrays and little
+traps that may frustrate programmers.  Jump directly to our
+[final solution](#handling-intra-string-newlines) to skip all the explanations.
+
 ## Creating BASH Arrays
 
 There are several ways to create BASH arrays.  Arrays can be created with the simple `( ... )`
@@ -115,3 +121,66 @@ and whether the variable is quoted or not.
 
 Find documentation for *mapfile* and *readarray* in `man bash`.
 
+## Saving and Restoring Arrays
+
+BASH provides nice array features that, once mastered, are powerful and easy to use. 
+Unfortunately, the BASH shell environment does not support BASH arrays.  This is not a
+problem for most cases, but it can be for scripts that contain several functions that might
+serve as callbacks.  For example, YAD dialogs can use callback functions that use an array,
+but in order for YAD to use the functions, both the functions and the arrays they may access
+must be exported to the environment.  Special treatment is required for array data to
+pass between the functions.
+
+### Removing the Equals Character
+
+For these examples, we are no longer using the **=** (equals) character to connect the
+option name with the option value.  In most commands, and for YAD in particular, the
+equals character is not necessary.  Leaving it out now will make some array operations
+easier to understand and use.
+
+### Exporting an Array
+
+Our first example shows how the default environment affects the format of an exported array.
+Since we earlier covered the impact spaces may have on an array, we are using spaceless
+parameters to simplyfy the example.  Be aware of the missing spaces when attempting to
+recreate these experiments.
+
+![exporting an array](img7.png)
+
+### Export With Altered IFS
+When copying the array, BASH uses the first character of the *IFS* environment variable to
+separate the array elements.  Normally, the character of *IFS* is a space, so spaces are used
+between the elements.  Let's see what happens if we reorder the *IFS* to put the newline first.
+(Notice that the *IFS* value is saved and restored.  It is a good practice, with global variables,
+to "clean up after yourself" in case another process has changed the *IFS* value and may
+need the altered value again.)
+
+![export with altered ifs](img8.png)
+
+### Returning the Spaces
+We reintroduce the spaces in the following example.  Notice how the quotes-enclosed phrases
+are kept togther on their own lines.  However, when we use the exported variable to restore
+the array, the spaces, along with the newline and tab characters, signal new elements.  The
+restored array has too many elements.
+
+![introducing spaces](img9.png)
+
+### Limiting IFS to Newline
+To fix the problem with spaces, let's limit *IFS* to a single character, the newline.
+The space between the words no longer prompt new array elements.  This is a nice, but incomplete,
+solution:
+
+![limiting IFS to newline](img10.png)
+
+### Handling Intra-string Newlines
+
+This is our final solution for saving and restoring arrays.
+
+We would prefer to have strings include newlines.  When we allow newlines in the string, we
+can no longer use newline for the *IFS* value.  We will replace the newline character with an
+unreadable character, `\a`, which is the *bell* character.
+
+![handling intra-string newlines](img11.png)
+
+The bell character may not be appropriate in all situations.  Feel free to use another character
+as the *IFS* value, as long as it is not included in the text being saved.

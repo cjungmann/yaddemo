@@ -77,3 +77,55 @@ printf "'%s'\n" "${arr[@]}"
 echo $str | mapfile arr
 echo "arr has ${#arr[@]} elements."
 printf "'%s'\n" "${arr[@]}"
+
+## (img7) Exporting an Array
+arr=(yad --title "Yet-Another-Dialog" --text "Behold")
+echo "arr has ${#arr[@]} elements."
+export SBS_ARR="${arr[@]}"
+echo "${SBS_ARR}"
+
+
+## (img8) Export With Altered IFS
+arr=(yad --title "Yet-Another-Dialog" --text "Behold")
+OIFS=$IFS
+IFS=$'\n\t '
+export SBS_ARR="${arr[@]}"
+echo "${SBS_ARR}"
+arr=( ${SBS_ARR} )
+IFS=$OIFS
+printf "'%s'\n" "${arr[@]}"
+
+## (img9) Introducing Spaces
+arr=(yad --title "YAD Dialog" --text "Behold the Dialog")
+OIFS=$IFS
+IFS=$'\n\t '
+export SBS_ARR="${arr[@]}"
+echo "${SBS_ARR}"
+arr=( ${SBS_ARR} )
+IFS=$OIFS
+printf "'%s'\n" "${arr[@]}"
+
+## (img10) Limiting IFS to Newline
+arr=(yad --title "YAD Dialog" --text "Behold the Dialog")
+OIFS=$IFS
+IFS=$'\n'
+export SBS_ARR="${arr[@]}"
+echo "${SBS_ARR}"
+arr=( ${SBS_ARR} )
+IFS=$OIFS
+printf "'%s'\n" "${arr[@]}"
+
+## (img11) Handling Intra-string Newlines
+arr=(yad
+     --title "YAD Dialog"
+     --text "\
+Behold the Dialog,
+now using two lines."
+)
+OIFS=$IFS
+IFS=$'\a'
+export SBS_ARR="${arr[@]}"
+echo "${SBS_ARR}"
+arr=( ${SBS_ARR} )
+IFS=$OIFS
+printf "'%s'\n" "${arr[@]}"
