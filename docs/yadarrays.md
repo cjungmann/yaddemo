@@ -45,7 +45,7 @@ newlines removes them to, despite appearances, form a single line."
 ~~~
 ![yad dialog](ya_img1.png)
 
-### Problems with the Escaping Newlines
+### Problems with Escaping Newlines
 
 The problem with newline escaping is that it is a fragile construction.  The formatting
 hides the fact that everything is on a single line, so simple errors can disrupt the
