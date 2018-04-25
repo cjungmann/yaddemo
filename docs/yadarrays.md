@@ -108,8 +108,9 @@ yad "${cmd[@]}"
 ~~~
 ![array with comment](ya_img3.png)
 
-Although the commented-out `--image` option removed the icon from the dialog, the other
-options were faithfully submitted and are represented in the dialog.
+The commented-out `--image` option removed the icon from the dialog, like we tried to do in the
+previous example.  However, in this case, the other options were faithfully submitted and are
+represented in the dialog.
 
 ### The Problem with Arrays
 
