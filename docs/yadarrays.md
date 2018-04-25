@@ -5,93 +5,111 @@ array than an extended line with escaped newlines.  I also use an array to colle
 common YAD options to facilitate a constant look among the YAD dialogs in an 
 application.
 
-Here is an example that shows the difference between calling YAD directly or with an
-array of options:
+This document includes the following topics:
+- [Breaking-up YAD Commands](#breaking-up-yad-commands)
+- [Break Long Commands With Escaped Newlines](#break-long-commands-with-escaped-newlines)
+- [Problems with Escaping Newlines](#problems-with-escaping-newlines)
+- [Break Long Commands With Arrays](#break-long-commands-with-arrays)
+- [The Problem with Arrays](#the-problem-with-arrays)
+
+## Breaking-up YAD Commands
+
+YAD commands are typically very long, often with many dozens of options and text
+parameters used to create useful dialogs.  Submitting these command presents a
+usability problem: it can be very difficult to manage very long command lines.
+The very long text will wrap over several lines or will be truncated (cut-short)
+to to fit within the borders of the editing or shell window.  Wrapped or truncated
+lines are hard to read, and it is tedious to position a cursor within a long string
+to make changes.
+
+### Break Long Commands With Escaped Newlines
+
+A shell generally executes a command when it receives a newline (when the user presses
+the ENTER or RETURN key).  To help reading very long command line calls, the shell will
+disregard a newline that is immediately preceded by a backslash character.  A newline
+prepared this way is called an *escaped newline*.  Escaping newlines in a long YAD
+invocation makes the command much easier to read and edit:
 
 ~~~sh
-#!/bin/bash
-
-# First method: directly call YAD with explicit options:
 yad --center \
+    --image=gtk-dialog-info \
     --borders=10 \
     --width=500 \
-    --height=600 \
-    --title="Exploring BASH Arrays" \
+    --fixed \
+    --title="Exploring Long YAD Commands" \
     --button="Done":1 \
     --text="\
 This invocation of YAD is all on one command line, despite the \
 fact that it shows as several lines in the script.  Escaping the \
 newlines removes them to, despite appearances, form a single line."
+~~~
+![yad dialog](ya_img1.png)
 
+### Problems with the Escaping Newlines
 
-# Create an array of YAD options:
+The problem with newline escaping is that it is a fragile construction.  The formatting
+hides the fact that everything is on a single line, so simple errors can disrupt the
+command.
+
+Invisible errors may also break the string:
+
+- A programmer may fail to notice a missing backslash when scanning the code.
+- A space following the line-ending backslash causes the space to be escaped instead
+  of the newline, which now terminates the line and the command.
+
+Representing a single command with multiple lines in an editor may tempt a programmer to
+insert a comment character to temporarily remove a line.  In that case, the command will
+be terminated just before the comment, as illustrated in this example:
+
+~~~sh
+yad --center \
+    # --image=gtk-dialog-info \
+    --borders=10 \
+    --width=500 \
+    --fixed \
+    --title="Exploring Long YAD Commands" \
+    --button="Done":1 \
+    --text="\
+This invocation of YAD is all on one command line, despite the \
+fact that it shows as several lines in the script.  Escaping the \
+newlines removes them to, despite appearances, form a single line."
+~~~
+![interrupted yad dialog](ya_img2.png)
+
+Not only is the icon removed, but the other options are also missing.  Notice that the caption
+and buttons have reverted to the default settings, and the dialog text is missing.
+
+### Break Long Commands With Arrays
+
+Creating an array to collect the options is a useful alternative.  The array can be
+formatted similar to the escaped newline method to be pleasing to read and easier to edit.
+Although the array elements span several lines, they are expanded on a single line when
+presented to the shell.  Array elements can be individually commented-out, and newlines that
+are missing or badly-formed will not terminate the command.
+
+Compare the following example to the previous examples:
+
+Using an array to collect the options, then expand to generate the dialog.
+~~~sh
+# Create the options array
 cmd=(
    --center
+   # --image=gtk-dialog-info
    --borders=10
    --width=500
-   --height=600    
-   --title="Exploring BASH Arrays" 
+   --fixed
+   --title="Exploring Long YAD Commands"
    --button="Done":1
+   --text="This invocation of YAD"
 )
 
-# Second method: Invoke YAD, supplying the options by expanding the array:
-yad "${cmd[@]}" --text="This invocation of YAD"
+# Invoke YAD, supplying the options by expanding the array:
+yad "${cmd[@]}"
 ~~~
+![array with comment](ya_img3.png)
 
-BASH executes a command when it encounters a newline, so commands cannot extend to a second
-line.  For formatting purposes, it is allowed to escape the newline by ending a line with a
-backslash, as can be see in the first method of the example script.
-
-### The Problem with Escaping Newlines
-
-Escaping the newlines works fine, but invisible errors can sabotage the command execution.
-First, it may be hard to notice a missing backslash on one of the lines, and even more
-insidious, if a space follows the backslash, the backslash will escape the space and not
-the newline.  In either of these cases, the command will not receive the options that 
-follow the unescaped newline.  Compounding the problem, there may be no obvious errors in
-the dialog resulting from the incomplete command.  Invisible errors and symptoms make for
-difficult debugging.
-
-### Advantages of Using Arrays
-
-Besides being easier to read array-formatted command lines, it's also easier to combine
-multiple arrays or to temporarily comment out individual options.
-
-~~~sh
-cmd=(
-    # --text="Please fill out the following survey for a prize."
-    --text="Our legal department advised against asking for a birthdate."
-    --form
-    --field="First Name" ""
-    --field="Last Name" ""
-    # --field="Birthday":DT "1960/04/21"
-    --button="Done":1
-)
-~~~
-
-![commenting_array_elements](commenting_array_elements.png)
-
-Notice how commenting the first of the text options did not prevent the reading of the following
-options.  If we had created a long line by escaping newlines, the options following the first
-commented newline would be ignored:
-
-~~~sh
-yad \
-    --title="Commenting Escaped Newlines" \
-    # --text="Please fill out the following survey for a prize." \
-    --text="Our legal department advised against asking for a birthdate." \
-    --form \
-    --field="First Name" "" \
-    --field="Last Name" "" \
-    # --field="Birthday":DT "1960/04/21" \
-    --button="Done":1
-~~~
-
-![commenting_escaped_newlines](commenting_escaped_newlines.png)
-
-Notice that the options that follow the commented text are lost.  No longer explicitely calling
-for a **Done** button, YAD falls back to the default **Cancel** and **OK** buttons.
-
+Although the commented-out `--image` option removed the icon from the dialog, the other
+options were faithfully submitted and are represented in the dialog.
 
 ### The Problem with Arrays
 
@@ -99,7 +117,6 @@ If you accept the argument in favor of using arrays for YAD options, you may be 
 that arrays bring their own problems.  In particular, it is not possible for a function to
 return an array, and it is not possible to export an array 
 
-
 The challenge with sharing arrays among BASH scripts and exported functions is that
-BASH cannot save an array to an environment variable.  The [BASH Arrays](docs/basharrays.md)
+BASH cannot save an array to an environment variable.  The [BASH Arrays](basharrays.md)
 guide shows how I solved this problem.
