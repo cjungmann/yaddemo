@@ -167,8 +167,8 @@ restored array has too many elements.
 
 ### Limiting IFS to Newline
 To fix the problem with spaces, let's limit *IFS* to a single character, the newline.
-The space between the words no longer prompt new array elements.  This is a nice, but incomplete,
-solution:
+The space between the words no longer prompt new array elements.  This is a nice, but
+incomplete, solution:
 
 ![limiting IFS to newline](img10.png)
 
@@ -177,10 +177,13 @@ solution:
 This is our final solution for saving and restoring arrays.
 
 We would prefer to have strings include newlines.  When we allow newlines in the string, we
-can no longer use newline for the *IFS* value.  We will replace the newline character with an
-unreadable character, `\a`, which is the *bell* character.
+can no longer use newline for the *IFS* value.  We will replace the newline character with
+an unreadable character, `\a`, which is the *bell* character.  Do not worry about the
+apparent lack of breaks between several of the elements in the printout of SBS_ARG.  It is
+the unreadable nature of the `\a` character that makes it unlikely to be used in a text
+string and inspires us to use the character as a field separator.
 
 ![handling intra-string newlines](img11.png)
 
-The bell character may not be appropriate in all situations.  Feel free to use another character
-as the *IFS* value, as long as it is not included in the text being saved.
+The `\a` character may not be appropriate in all situations.  Feel free to use another
+character as the *IFS* value, as long as it is not included in the text being saved.
