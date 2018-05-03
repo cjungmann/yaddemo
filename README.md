@@ -71,6 +71,17 @@ Besides having an introduction to the syntax differences with using BASH variabl
 page will talk about the why BASH cannot save arrays in an environment variable and will
 present one successful method for saving and restoring BASH arrays variables.
 
+### BASH Scoping
+
+[BASH Scoping](docs/bashscope.md)
+
+I was making some bad assumptions about how BASH variables are scoped.  This page talks
+about how BASH variables, created in one function, are visible to functions called by
+by the function in which the variables are created.
+
+This page also covers a BASH trap I fell into, having made a bad assumption about
+how an exit status value was set.
+
 ### External YAD Resources
 
 As I began exploring the limits of YAD, I found the following documentation useful as
