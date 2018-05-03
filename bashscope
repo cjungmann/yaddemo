@@ -1,0 +1,95 @@
+#!/bin/bash
+
+set_variables()
+{
+    v_named="outer_named"
+    declare v_declare="outer_declared"
+    local v_local="outer_local"
+
+    echo "Result 1:"
+    show_caller_variables
+
+    echo "Result 2:"
+    reassign_variables
+
+    echo "Result 3:"
+    show_caller_variables
+}
+
+show_caller_variables()
+{
+    echo "Reading functions set in calling function:"
+    echo "v_named='${v_named}'"
+    echo "v_declare='${v_declare}'"
+    echo "v_local='${v_local}'"
+    echo
+}
+
+reassign_variables()
+{
+    echo "Reassigning variables named in set_variables():"
+    v_named="reassigned, name only"
+    declare v_declare="reassigned, declared unspecified" 
+    local v_local
+
+    show_caller_variables
+}
+
+demo_declare_trap()
+{
+    cmd=(
+        --title="BASH Declare Assign Trap"
+        --fixed
+        --center
+        --text="Click on a button below to set the exit status on the button label."
+        --entry
+        --entry-label "Text Entry"
+        --entry-text "Text to return. Replace it if you want to."
+        --always-print-result
+        --button="Return 1":1
+        --button="Return 2":2
+        --button="Return 3":3
+    )
+
+    # Experiment 1: Variable result used without declaration:
+    result=$( yad "${cmd[@]}" --entry-text "Call without declare/local/global" )
+    exval=$?
+    echo "YAD exit status='$exval', result='${result}'"
+
+    # Experiment 2: Variable l_result declared (as local) on same line as the subshell assignment:
+    local l_result=$( yad "${cmd[@]}" --entry-text "Call with co-lined declare/local/global" )
+    exval=$?
+    echo "YAD exit status='$exval', result='${l_result}'"
+
+    # Experiment 3: Variable m_result declared on a separate line from the subshell assignment:
+    local m_result
+    m_result=$( yad "${cmd[@]}" --entry-text "Call with m_result declared local on previous line." )
+    exval=$?
+    echo "YAD exit status='$exval', result='${m_result}'"
+}
+
+
+if [ $# -gt 0 ]; then
+    case "$1" in
+        scope) set_variables ;;
+        trap)  demo_declare_trap ;;
+        maker)
+            echo "PS1='\\[\\033[01;36m\\]user\\[\\033[0m\\] $ '" > /tmp/doctips_profile
+            xterm -fa mono -fs 8 -geometry 86x20 -e bash --rcfile /tmp/doctips_profile &
+            gedit scripts_basharray.sh
+            unlink /tmp/doctips_profile
+            ;;
+    esac
+else
+    echo
+    echo "Usage: ./bashscope (scope|trap|maker)"
+    echo
+    echo "'scope' shows scope experiment"
+    echo "'trap' shows exit value trap"
+    echo "'maker' opens a small shell for making screen-prints of code and results."
+    echo
+fi
+
+
+
+
