@@ -1,0 +1,49 @@
+#!/bin/bash
+
+myarr=(global array elements)
+
+# Version 1, set array value to hard-coded variable name:
+reset_myarr()
+{
+   myarr=( $( date +"%Y %m %d" ) )
+}
+
+# Version 2, save array value to variable named in first paramater:
+reset_named_array()
+{
+    local arr="one
+two
+three
+four
+five"
+
+    # Piping to stdin does not work:
+    # echo $arr | read -a "$1"
+
+    # This version DOES work:
+    read -a "$1" < <( echo ${arr} )
+}
+
+request_array()
+{
+   declare -a myarr
+   reset_myarr
+   echo "Result of calling function that resets myarr directly:"
+   printf "%s\n" "${myarr[@]}"
+   echo
+
+   reset_named_array myarr
+   echo "Result of calling function that resets and array by name:"
+   printf "%s\n" "${myarr[@]}"
+   echo
+}
+
+echo "Original contents of global variable myarr:"
+printf "%s\n" "${myarr[@]}"
+echo
+
+request_array
+
+echo
+echo "Confirm the global-scope array was not touched:"
+printf "%s\n" "${myarr[@]}"
