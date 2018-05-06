@@ -15,7 +15,7 @@
 ## to copy the code fragments.
 
 echo "PS1='\\[\\033[01;36m\\]user\\[\\033[0m\\] $ '" > /tmp/doctips_profile
-xterm -fa mono -fs 8 -geometry 86x20 -e bash --rcfile /tmp/doctips_profile &
+xterm -fa mono -fs 9 -geometry 86x20 -e bash --rcfile /tmp/doctips_profile &
 gedit scripts_basharray.sh
 unlink /tmp/doctips_profile
 
