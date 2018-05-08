@@ -71,6 +71,15 @@ Besides having an introduction to the syntax differences with using BASH variabl
 page will talk about the why BASH cannot save arrays in an environment variable and will
 present one successful method for saving and restoring BASH arrays variables.
 
+### Returning BASH Arrays
+
+[Returning BASH Arrays](docs/bashreturnarray.md)
+
+BASH has reasonable, if unconventional, features for handling arrays.  Unfortunately,
+BASH lacks features for easily passing arrays to and from other functions.  Because it
+is sometimes useful to delegate the construction of an array to another function, I have
+worked out a few strategies for simulating a function returning an array.
+
 ### BASH Scoping
 
 [BASH Scoping](docs/bashscope.md)
