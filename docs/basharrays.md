@@ -6,6 +6,10 @@ This topic now follows sections on methods for creating arrays and little
 traps that may frustrate programmers.  Jump directly to our
 [final solution](#handling-intra-string-newlines) to skip all the explanations.
 
+A newer page about [Returning BASH Arrays](bashreturnarray.md) covers some of this
+same material as this page, with an emphasis on the delegation of constructing an
+array.
+
 ## Creating BASH Arrays
 
 There are several ways to create BASH arrays.  Arrays can be created with the simple `( ... )`
@@ -187,3 +191,8 @@ string and inspires us to use the character as a field separator.
 
 The `\a` character may not be appropriate in all situations.  Feel free to use another
 character as the *IFS* value, as long as it is not included in the text being saved.
+
+### Also Look At:
+
+A newer page about [Returning BASH Arrays](bashreturnarray.md) also suggests some successful
+methods for saving and restoring BASH arrays.
