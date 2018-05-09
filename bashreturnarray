@@ -1,49 +1,208 @@
 #!/bin/bash
 
-myarr=(global array elements)
+# Set a global array value to test variable lifetimes.
+myarr=( sample global array )
 
-# Version 1, set array value to hard-coded variable name:
+## The next set of functions are called, directly or indirectly,
+## by the primary functions
+
+return_array_building_string()
+{
+    local ESEP="$1"
+
+    # Change IFS to break ONLY at newlines to prevent
+    # breaks between words of multi-word array elements:
+    local IFS=$'\n'
+
+    local -a arr=(
+        "one"
+        "two words"
+        "three
+lines of
+words"
+    )
+
+    # echo "View array before sending back to caller:"
+    # printf "'%s'\n" "${arr[@]}"
+
+    # The magic occurs in the next two lines.  Using the '*' instead 
+    # of the '@' instructs BASH to use the first character of the IFS
+    # (which we also change below) between the elements.
+    IFS="${ESEP}"
+    echo "${arr[*]}"
+}
+
+generic_array_string_builder()
+{
+    local IFS="$1"
+    echo "${*:2}"
+}
+
+return_array_building_string_with_generic_function()
+{
+    local IFS="$1"
+    local -a arr=(
+        "one"
+        "two words"
+        "three
+lines of
+words"
+    )
+
+    generic_array_string_builder "${IFS}" "${arr[@]}"
+}
+
 reset_myarr()
 {
    myarr=( $( date +"%Y %m %d" ) )
 }
 
-# Version 2, save array value to variable named in first paramater:
-reset_named_array()
+demo_reset_by_name()
 {
-    local arr="one
-two
-three
-four
-five"
-
-    # Piping to stdin does not work:
-    # echo $arr | read -a "$1"
-
-    # This version DOES work:
-    read -a "$1" < <( echo ${arr} )
-}
-
-request_array()
-{
-   declare -a myarr
+   local -a myarr
    reset_myarr
-   echo "Result of calling function that resets myarr directly:"
-   printf "%s\n" "${myarr[@]}"
-   echo
 
-   reset_named_array myarr
-   echo "Result of calling function that resets and array by name:"
-   printf "%s\n" "${myarr[@]}"
+   echo "In demo_reset_by_name(), after calling reset_myarr(), the elements of myarr are:"
+   printf "'%s'\n" "${myarr[@]}"
    echo
 }
 
-echo "Original contents of global variable myarr:"
-printf "%s\n" "${myarr[@]}"
-echo
+reset_by_read()
+{
+    target="$1"
+    arr=( $( date +"%Y %m %d" ) )
 
-request_array
+    read -a "${target}" < <( echo "${arr[@]}" )
+}
 
-echo
-echo "Confirm the global-scope array was not touched:"
-printf "%s\n" "${myarr[@]}"
+demo_reset_by_read()
+{
+    local -a myarr
+    reset_by_read "myarr"
+
+    echo "In demo_reset_by_read(), after calling reset_by_read(), the elements of myarr are:"
+    printf "'%s'\n" "${myarr[@]}"
+    echo
+}
+
+reset_by_mapfile()
+{
+    target="$1"
+    arr=( $( date +"%Y %m %d" ) )
+
+    # This construction does not work, result is no elements
+    # echo "${arr[@]}" | mapfile -t "${target}"
+
+    # This construction does not work, result is single element with spaces
+    # mapfile -t "${target}" < <( echo "${arr[@]}" )
+    
+    # This is the proper construction.
+    local IFS=$'\n'
+    mapfile -t "${target}" < <( echo "${arr[*]}" )
+}
+
+demo_reset_by_mapfile()
+{
+    local -a myarr
+    reset_by_mapfile "myarr"
+
+    echo "In demo_reset_by_mapfile(), after calling reset_by_mapfile(), the elements of myarr:"
+    printf "'%s'\n" "${myarr[@]}"
+    echo
+}
+
+
+## Following functions are the primary functions, called with a case
+## statement sorting the input parameters on the command line:
+
+simple_return_array_string()
+{
+    local ESEP=$'\a'
+
+    # Uncomment the following to see what the returned string looks like:
+    # local arrstr=$( return_array_building_string "${ESEP}" )
+    # echo "arrstr = '${arrstr}'"
+
+    local IFS="${ESEP}"
+    local -a locarr=( $( return_array_building_string "${ESEP}" ) )
+    printf "'%s'\n\n" "${locarr[@]}"
+}
+
+generic_return_array_string()
+{
+    local ESEP=$'\a'
+    local IFS="${ESEP}"
+    local -a locarr=( $( return_array_building_string_with_generic_function "${ESEP}" ) )
+    printf "'%s'\n\n" "${locarr[@]}"
+}
+
+fake_return_reset_by_name()
+{
+    echo "In fake_return_reset_by_name(), the elements of myarr are:"
+    printf "'%s'\n" "${myarr[@]}"
+    echo
+
+    demo_reset_by_name
+
+    echo "Back in fake_return_reset_by_name(), the elements of myarr are:"
+    printf "'%s'\n" "${myarr[@]}"
+    echo
+}
+
+fake_return_reset_using_read()
+{
+    echo "In fake_return_reset_using_read(), the elements of myarr are:"
+    printf "'%s'\n" "${myarr[@]}"
+    echo
+
+    demo_reset_by_read "myarr"
+
+    echo "Back in fake_return_reset_using_read(), the elements of myarr are:"
+    printf "'%s'\n" "${myarr[@]}"
+    echo
+}
+
+fake_return_reset_using_mapfile()
+{
+    echo "In fake_return_reset_using_mapfile(), the elements of myarr:"
+    printf "'%s'\n" "${myarr[@]}"
+    echo
+
+    demo_reset_by_mapfile "myarr"
+
+    echo "Back in fake_return_reset_using_mapfile(), the elements of myarr:"
+    printf "'%s'\n" "${myarr[@]}"
+    echo
+}
+
+# echo "Original contents of global variable myarr:"
+# printf "%s\n" "${myarr[@]}"
+# echo
+
+# demo_returning_array_strings
+# demo_constructing_arrays_at_known_names
+
+# echo
+# echo "Confirm the global-scope array was not touched:"
+# printf "%s\n" "${myarr[@]}"
+
+
+prognum="$1"
+
+case $prognum in
+    1) echo "simple_return_array_string()"
+         simple_return_array_string
+         ;;
+    2) echo "generic_return_array_string()"
+         generic_return_array_string
+         ;;
+    3) echo "fake_return_reset_by_name()"
+       fake_return_reset_by_name
+       ;;
+    4) echo "fake_return_reset_using_read()"
+       fake_return_reset_using_read
+       ;;
+    5) echo "fake_return_reset_using_mapfile()"
+       fake_return_reset_using_mapfile
+       ;;
+esac
