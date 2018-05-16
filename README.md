@@ -91,6 +91,13 @@ by the function in which the variables are created.
 This page also covers a BASH trap I fell into, having made a bad assumption about
 how an exit status value was set.
 
+### BASH Conditionals
+
+[BASH Conditionals(docs/bashconditionals.md)
+
+BASH variables cannot hold a boolean value.  What does that mean?  Look at an
+alternative construction using a nested function.
+
 ### External YAD Resources
 
 As I began exploring the limits of YAD, I found the following documentation useful as
