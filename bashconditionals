@@ -1,0 +1,75 @@
+#!/bin/bash
+
+echo "Control execution, evaluating [ 1 -eq 0 ], which is not true:"
+if [ 1 -eq 0 ]; then
+    echo "The expression evaluates as true."
+else
+    echo "The expression evaluates as false."
+fi
+
+# In the following examples, I unset boolval before setting it with
+# a new statement to avoid carryover from a previous experiment
+# when a statement has no effect on the variable.
+
+echo
+echo "Experiment 1: Setting boolval=false, boolval should be false."
+unset boolval
+boolval=false
+echo -n "boolval is '$boolval' "
+if [ boolval ]; then
+   echo "boolval evaluates true"
+else
+   echo "boolval evaluates false"
+fi
+
+echo
+echo "Experiment 2: Setting boolval=1, boolval should be false."
+unset boolval
+boolval=1
+echo -n "boolval is '$boolval' "
+if [ boolval ]; then
+   echo "boolval evaluates true"
+else
+   echo "boolval evaluates false"
+fi
+
+echo
+echo "Experiment 3: Setting boolval=\$( [ 1 -eq 0 ] ), boolval should be false."
+unset boolval
+boolval=$( [ 1 -eq 0 ] )
+
+echo -n "boolval is '$boolval' "
+if [ boolval ]; then
+   echo "boolval evaluates true"
+else
+   echo "boolval evaluates false"
+fi
+
+echo
+echo "Experiment 4: Setting boolval=\$( [ 1 -eq 0 ]; echo \$? ), boolval should be false."
+unset boolval
+boolval=$( [ 1 -eq 0 ]; echo $? )
+
+echo -n "boolval is '$boolval' "
+if [ boolval ]; then
+   echo "boolval evaluates true"
+else
+   echo "boolval evaluates false"
+fi
+
+echo
+echo "None of the experiments resulted in a variable that directly evaluates"
+echo "as false.  Evaluating a variable will "
+
+loop_with_lambda()
+{
+    local -i limit=10
+    local -i ndx=0
+    keep_looping() { (( ndx++ )); [ "$ndx" -le "$limit" ]; }
+
+    while keep_looping; do
+        echo "ndx = $ndx"
+    done
+}
+
+loop_with_lambda
