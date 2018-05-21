@@ -1,0 +1,169 @@
+#!/bin/bash
+
+# This is a failed experiment, attempting to make a paned
+# dialog where one of the panes is a notebook.
+#
+# It does have a programming idea that might be useful, in
+# that the separate plugs are created in separate functions,
+# applying a plug value into the command.
+#
+# Otherwise, this is mainly an artifact of a failed
+# experiment.
+
+declare -a YAD_COMMON=(
+  --center
+  --borders 10
+  --height 400
+  --width 600
+  --title "YAD Composites"
+)
+
+PSEP=$'\t'
+
+yad_plug_ps_list()
+{
+    local -i tabnum="$1"
+    local -i plug="$2"
+
+    local -a cmd=(
+        --plug "${plug}"
+        --tabnum "$tabnum"
+        --list
+        --height 400
+        --column "PID":NUM
+        --column "CMD":TXT
+        )
+
+    local -a data=( $( ps -A | awk '{ print $1, $4 }' - ) )
+    yad "${cmd[@]}" "${data[@]}" &
+}
+
+yad_plug_ls_list()
+{
+    local -i tabnum="$1"
+    local -i plug="$2"
+
+    local -a cmd=(
+        --plug "${plug}"
+        --tabnum "$tabnum"
+        --list
+        --height 400
+        --column "Size":NUM
+        --column "Name":TXT
+    )
+    local -a data=( $( ls -o | awk 'NF>2 { print $4, $8 }' - ) )
+    yad "${cmd[@]}" "${data[@]}" &
+    
+}
+
+yad_plug_fc_list()
+{
+    local -i tabnum="$1"
+    local -i plug="$2"
+
+    local -a cmd=(
+        --plug "${plug}"
+        --tabnum "$tabnum"
+        --list
+        --height 400
+        --column "Name":TXT
+        --column "Style":TXT
+    )
+
+    local -a data=( $( fc-list | awk -F : 'length($2)<30 { printf $2 }' - ) )
+    yad "${cmd[@]}" "${data[@]}" &
+}
+
+yad_plug_meta_data()
+{
+    local -i tabnum="$1"
+    local -i plug="$2"
+
+    local -a cmd=(
+        --plug "${plug}"
+        --tabnum "$tabnum"
+        --form
+        --field "Name":TEXT
+        --field "Occupation":TEXT
+    )
+
+    yad "${cmd[@]}" &
+}
+
+
+#
+# Obligatory params 1 & 2 are tabcount and key value
+# Optional params 3 & 4 (either both or neither) are tabnum and plug
+yad_plug_notebook()
+{
+    local -i tabcount="$1"
+    local -i key="$2"
+
+    local -i exval
+
+    local -i i
+    local -a tabs=( $( for (( i=1 ; i<=$tabcount ; i++ )) ; do echo "--tab Tab$i"; done ) )
+
+    local -a cmd=(
+        --notebook
+        --key="${key}"
+        "${tabs[@]}"
+        )
+
+    if [ $# -gt 3 ]; then
+        local -i tabnum plug
+        tabnum="$3"
+        plug="$4"
+        echo "yad --plug ${plug} --tabnum ${tabnum} ${cmd[@]}" >&2
+        yad --plug "${plug}" --tabnum "${tabnum}" "${cmd[@]}" & 
+        exval=$?
+    else
+        yad "${YAD_COMMON[@]}" "${cmd[@]}"
+        exval=$?
+    fi
+
+    return $exval
+}
+
+paned_with_notebook()
+{
+    local -i exval
+    local -i key=$$
+    local result
+
+    local -i nbkey=$$
+    (( nbkey++ ))
+
+    echo "key is '$key' and nbkey is '$nbkey'" >&2
+
+    local -a paned=(
+        "${YAD_COMMON[@]}"
+        --paned
+        --key "${key}"
+        --tab "Tab1"
+        --tab "Tab2"
+    )
+    
+    result=$(
+        yad_plug_meta_data 1 "${key}"
+        yad_plug_ls_list 2 "${key}"
+
+        yad_plug_ls_list 1 "${nbkey}"
+        yad_plug_ps_list 2 "${nbkey}"
+        yad_plug_fc_list 3 "${nbkey}"
+        yad_plug_notebook 3 "${nbkey}" 2 "${key}"
+
+        yad "${paned[@]}"
+        
+          )
+
+    exval=$?
+    if [ $exval -eq 0 ]; then
+        echo "The result is '$result'" >&2
+    else
+        echo "Yad failed with exval='$exval'" >&2
+    fi
+}
+
+
+paned_with_notebook
