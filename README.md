@@ -80,6 +80,14 @@ BASH lacks features for easily passing arrays to and from other functions.  Beca
 is sometimes useful to delegate the construction of an array to another function, I have
 worked out a few strategies for simulating a function returning an array.
 
+### BASH Arrays with IFS
+
+[BASH Arrays with IFS](doc/bashifs.md)
+
+The **IFS** environment variable is a powerful tool for manipulating arrays.  This
+guide presents some examples of how to take advantage of IFS.  The guide includes
+an example of using *IFS* to create multi-dimensional BASH arrays
+
 ### BASH Scoping
 
 [BASH Scoping](docs/bashscope.md)
