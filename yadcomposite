@@ -1,169 +1,397 @@
 #!/bin/bash
 
-# This is a failed experiment, attempting to make a paned
-# dialog where one of the panes is a notebook.
-#
-# It does have a programming idea that might be useful, in
-# that the separate plugs are created in separate functions,
-# applying a plug value into the command.
-#
-# Otherwise, this is mainly an artifact of a failed
-# experiment.
-
-declare -a YAD_COMMON=(
-  --center
-  --borders 10
-  --height 400
-  --width 600
-  --title "YAD Composites"
+declare -a COMMON_ARGS=(
+    --center
+    --height 600
+    --width 600
+    --borders 10
+    --title "YAD Composite Dialogs"
 )
 
-PSEP=$'\t'
-
-yad_plug_ps_list()
+# Find the index into an array of a target string in the first param.
+# An exit status of 1 means the target was not a member of the array.
+# eg seek_index "target" "${arr[@]}"
+seek_index()
 {
-    local -i tabnum="$1"
-    local -i plug="$2"
+   local el target="$1"
+   local -i ndx=0
 
-    local -a cmd=(
-        --plug "${plug}"
-        --tabnum "$tabnum"
-        --list
-        --height 400
-        --column "PID":NUM
-        --column "CMD":TXT
-        )
+   for el in "${@:2}"; do
+      if [ "$el" == "$target" ]; then
+         echo "${ndx}"
+         return 0
+      fi
+      (( ndx++ ))
+   done
 
-    local -a data=( $( ps -A | awk '{ print $1, $4 }' - ) )
-    yad "${cmd[@]}" "${data[@]}" &
+   return 1
 }
 
-yad_plug_ls_list()
-{
-    local -i tabnum="$1"
-    local -i plug="$2"
 
-    local -a cmd=(
-        --plug "${plug}"
-        --tabnum "$tabnum"
-        --list
-        --height 400
-        --column "Size":NUM
-        --column "Name":TXT
-    )
-    local -a data=( $( ls -o | awk 'NF>2 { print $4, $8 }' - ) )
-    yad "${cmd[@]}" "${data[@]}" &
-    
-}
 
-yad_plug_fc_list()
-{
-    local -i tabnum="$1"
-    local -i plug="$2"
+# Support data and functions for make_survey_plug():
 
-    local -a cmd=(
-        --plug "${plug}"
-        --tabnum "$tabnum"
-        --list
-        --height 400
-        --column "Name":TXT
-        --column "Style":TXT
+declare survey_text="\
+Please rate each of the following statements according to how much
+you agree.  0 for disagree completely, 10 for agree completely."
+
+declare -a SURVEY_QUESTIONS=(
+    "Winter is my favorite season."
+    "I prefer morning to evening."
+    "I prefer to live in a city."
+    "I prefer classical music to hip-hop."
+    "I am an introvert."
     )
 
-    local -a data=( $( fc-list | awk -F : 'length($2)<30 { printf $2 }' - ) )
-    yad "${cmd[@]}" "${data[@]}" &
+make_survey_questions_data_str()
+{
+    local sep=$'\n'
+    local ques
+    for ques in "${SURVEY_QUESTIONS[@]}"; do
+        echo "--field${sep}${ques}:NUM${sep}0!0..10"
+    done
 }
 
-yad_plug_meta_data()
-{
-    local -i tabnum="$1"
-    local -i plug="$2"
 
-    local -a cmd=(
-        --plug "${plug}"
-        --tabnum "$tabnum"
-        --form
-        --field "Name":TEXT
-        --field "Occupation":TEXT
+# Support data and functions for make_short_list_plug():
+
+declare -a TASK_LIST=(
+    "Make Bed"
+    "Eat Breakfast"
+    "Work"
+    "Make and Eat Dinner"
+    "Clean Up"
+    "Pay Bills"
+    "Go to Bed"
     )
 
-    yad "${cmd[@]}" &
-}
-
-
-#
-# Obligatory params 1 & 2 are tabcount and key value
-# Optional params 3 & 4 (either both or neither) are tabnum and plug
-yad_plug_notebook()
+make_task_list_data_str()
 {
-    local -i tabcount="$1"
-    local -i key="$2"
-
-    local -i exval
-
-    local -i i
-    local -a tabs=( $( for (( i=1 ; i<=$tabcount ; i++ )) ; do echo "--tab Tab$i"; done ) )
-
-    local -a cmd=(
-        --notebook
-        --key="${key}"
-        "${tabs[@]}"
-        )
-
-    if [ $# -gt 3 ]; then
-        local -i tabnum plug
-        tabnum="$3"
-        plug="$4"
-        echo "yad --plug ${plug} --tabnum ${tabnum} ${cmd[@]}" >&2
-        yad --plug "${plug}" --tabnum "${tabnum}" "${cmd[@]}" & 
-        exval=$?
-    else
-        yad "${YAD_COMMON[@]}" "${cmd[@]}"
-        exval=$?
+    local delim="${IFS:0:1}"
+    if [ "$delim" == $' ' ]; then
+        echo "Spaces in elements make space an inappropriate IFS character." >&2
     fi
 
-    return $exval
+    local task
+    for task in "${TASK_LIST[@]}"; do
+        echo -n "${task}${delim}FALSE${delim}"
+    done
 }
 
-paned_with_notebook()
+
+# Beginning of plug sub dialogs that will be incorporated
+# into different composite dialogs.
+
+make_demographic_plug()
 {
-    local -i exval
-    local -i key=$$
-    local result
+   local -i plug tabnum
+   plug="$1"
+   tabnum="$2"
 
-    local -i nbkey=$$
-    (( nbkey++ ))
+   local -a cmd
+   cmd=(
+       --plug "$plug"
+       --tabnum "$tabnum"
+       --text "Please enter the following demographics information."
+       --gtkrc "gtkrc_blue"
+       --form
+       --field "First Name"
+       --field "Last Name"
+       --field "Date-of-birth":DT
+   )
 
-    echo "key is '$key' and nbkey is '$nbkey'" >&2
+   yad "${cmd[@]}" &
+}
 
-    local -a paned=(
-        "${YAD_COMMON[@]}"
+make_survey_plug()
+{
+    local -i plug tabnum
+    plug="$1"
+    tabnum="$2"
+    
+    local -a cmd
+    cmd=(
+        --plug "$plug"
+        --tabnum "$tabnum"
+        --text "$survey_text"
+        --gtkrc "gtkrc_red"
+        --form
+    )
+
+    local IFS=$'\n'
+    local -a questions=( $( make_survey_questions_data_str ) )
+
+    yad "${cmd[@]}" "${questions[@]}" &
+}
+
+make_ps_plug()
+{
+    local -i plug tabnum
+    plug="$1"
+    tabnum="$2"
+    
+    local -a cmd data
+    cmd=(
+        --plug "$plug"
+        --tabnum "$tabnum"
+        --list
+        --column "Process ID":NUM
+        --column "Command":TEXT
+    )
+
+    data=( $( ps -A | awk '{print $1, $4}' - ) )
+    
+    yad "${cmd[@]}" "${data[@]}" &
+}
+
+make_short_list_plug()
+{
+    local -i plug tabnum
+    plug="$1"
+    tabnum="$2"
+
+    local -a cmd data
+    cmd=(
+        --text "To-do List"
+        --plug "$plug"
+        --tabnum "$tabnum"
+        --list
+        --column "Task":TEXT
+        --column "Completed":CHK
+    )
+
+    local IFS=$'\a'
+    data=( $( make_task_list_data_str ) )
+
+    yad "${cmd[@]}" "${data[@]}" &
+}
+
+# Start of functions that consolidate the plugs into composite dialogs
+
+# Problem dialogs
+
+# Section "Data Assigment Challenge"
+# Out-of-Phase (oop) Demo.
+oop_demo()
+{
+    local -a cmd data
+    cmd=(
+        --title "Title String in Dialog Caption Bar"
+        --text
+        --center
+        --height 600
+        --width 600
+        --list
+        --column "Task":TEXT
+        --column "Completed":CHK
+    )
+
+    local IFS=$'\a'
+    data=( $( make_task_list_data_str ) )
+
+    yad "${cmd[@]}" "${data[@]}"
+}
+
+
+
+paned_demo()
+{
+    local -i plug="$$"
+    local -i exval;
+
+    local -a cmd=(
+        "${COMMON_ARGS[@]}"
         --paned
-        --key "${key}"
+        --always-print-result
+        --key "${plug}"
         --tab "Tab1"
         --tab "Tab2"
     )
-    
-    result=$(
-        yad_plug_meta_data 1 "${key}"
-        yad_plug_ls_list 2 "${key}"
 
-        yad_plug_ls_list 1 "${nbkey}"
-        yad_plug_ps_list 2 "${nbkey}"
-        yad_plug_fc_list 3 "${nbkey}"
-        yad_plug_notebook 3 "${nbkey}" 2 "${key}"
-
-        yad "${paned[@]}"
-        
-          )
-
-    exval=$?
-    if [ $exval -eq 0 ]; then
-        echo "The result is '$result'" >&2
-    else
-        echo "Yad failed with exval='$exval'" >&2
+    if [ $# -gt 0 ]; then
+        case "$1" in
+            splitter)
+                cmd=( "${cmd[@]}" --splitter 300 )
+                ;;
+        esac
     fi
+
+    result=$(
+        # make_demographic_plug "$plug" 1 theme
+        make_survey_plug "$plug" 1 theme
+        make_ps_plug "$plug" 2 theme
+        yad "${cmd[@]}"
+          )
+    exval=$?
+    case $exval in
+        0) echo "Success, the result is:"
+           echo "${result}"
+           ;;
+        1) ;; # pressed Cancel button
+        252) ;; # pressed ESC key or window close
+    esac
 }
 
+notebook_demo()
+{
+    local -i plug="$$"
+    local -i exval;
 
-paned_with_notebook
+    local -a cmd=(
+        "${COMMON_ARGS[@]}"
+        --notebook
+        --always-print-result
+        --key "${plug}"
+        --tab "Demographics"
+        --tab "Survey"
+        --tab "Process List"
+        --tab "Short List"
+    )
+
+    local result
+    result=$(
+        make_demographic_plug "$plug" 1 theme
+        make_survey_plug "$plug" 2 theme
+        make_ps_plug "$plug" 3
+        make_short_list_plug "$plug" 4
+        yad "${cmd[@]}"
+          )
+    exval=$?
+}
+
+# Paned List Problems (plp)
+#
+plp_demo()
+{
+    local -i plug="$$"
+    local -i exval;
+    local text result
+
+    # The --key option cannot be in this resuable array
+    # when the plug value from which it would be set is
+    # changing from dialog to dialog.
+    local -a cmd=(
+        "${COMMON_ARGS[@]}"
+        --paned
+        --always-print-result
+        --tab "Tab1"
+        --tab "Tab2"
+    )
+
+    text="\
+Normally, a composite dialog just displays without any \
+problems.  This dialog consists of two forms, but in later \
+sections of this experiment, the inclusion of a tab with \
+a list dialog will cause several errors, some visible in \
+the console window, and in some situations, the list pane \
+will fail altogether."
+    echo >&2
+    echo "About to create a paned dialog without a list." >&2
+    result=$(
+        make_demographic_plug "$plug" 1
+        make_survey_plug "$plug" 2
+        yad --key "$plug" --text "$text" "${cmd[@]}"
+        )
+    
+    text="\
+Any composite dialog containing a list can cause errors. \
+Look at the console window to see error message about the \
+height of the dialog.  I haven't yet found any way to \
+eliminate the error messages, so I'm ignoring them for now."
+    echo >&2
+    echo "About to create a paned dialog with a long list." >&2
+
+    (( plug++ ))
+    result=$(
+        make_demographic_plug "$plug" 1
+        make_ps_plug "$plug" 2
+        # make_short_list_plug "$plug" 2
+        yad --key "$plug" --text "$text" "${cmd[@]}"
+          )
+
+    text="\
+Even making a short list that fits within the dialog borders \
+usually prevents the error."
+    echo >&2
+    echo "About to create a paned dialog with a short list." >&2
+    (( plug++ ))
+    result=$(
+        make_demographic_plug "$plug" 1
+        make_short_list_plug "$plug" 2
+        yad --key "$plug" --text "$text" "${cmd[@]}"
+          )
+
+    text="\
+If the top pane contains the list, the composite dialog may \
+altogether fail to display."
+    echo >&2
+    echo "About to create a paned dialog where the long list pane" >&2
+    echo "pane is on top.  There are bug warnings in my version." >&2
+    (( plug++ ))
+    result=$(
+        make_ps_plug "$plug" 1
+sch        make_demographic_plug "$plug" 2
+        yad --key "$plug" --text "$text" "${cmd[@]}"
+          )
+
+    text="\
+The solution to this kind of error is to include the --splitter \
+option. This dialog includes the splitter option, and now you can \
+see both panes."
+    echo >&2
+    echo "This composite dialog is the same as the previous failed" >&2
+    echo "dialog, except for the added splitter option." >&2
+    (( plug++ ))
+    result=$(
+        make_ps_plug "$plug" 1
+        make_demographic_plug "$plug" 2
+        yad --key "$plug" --text "$text" --splitter 300 "${cmd[@]}"
+          )
+}
+
+declare -A EXPERIMENTS=(
+    [oop]="      Section: Data Assignment Challenge"
+    [paned]="    Section: Using a Paned Dialog"
+    [notebook]=" Section: Using a Notebook Dialog"
+    [plp]="      Section: Paned List Problems"
+)
+
+declare -a ENAMES=( "${!EXPERIMENTS[@]}" )
+
+show_options()
+{
+    local sname, section
+    for sname in "${ENAMES[@]}"; do
+        echo "\"$sname\" ${EXPERIMENTS[$sname]}"
+    done
+}
+
+show_usage()
+{
+    local IFS='|'
+
+    echo "Use yadcomposite to run experiments that are described"
+    echo "in yadcomposite.md.  Enter"
+    echo
+    echo "yadcomposite [${ENAMES[@]}]"
+    echo
+    echo "Where"
+    show_options
+}
+
+if [ $# -lt 1 ]; then
+    show_usage
+else
+    seek_index "$1" "${ENAMES[@]}"
+    if [ $? -eq 0 ]; then
+        "${1}_demo"
+        exit 0
+    else
+        echo "\"${1}\" is not a valid option.  Instead, use:"
+        show_options
+        exit 1
+    fi
+fi
+
+
+
