@@ -1,35 +1,68 @@
 #!/bin/bash
 
-get_path_gtk_includes()
+get_path_gtk_stock()
 {
-    path_gtk_h=$( locate gtk/gtk.h )
-    path_gtk="${path_gtk_h%'gtk.h'}"
-    echo ${path_gtk}
+    # Notice: 'gtkstock.h' has been completely deprecated and no longer exists as of 'gtk-4.0'
+    #
+    local -a path_gtk_h=( $( locate gtk/gtk.h ) )
+    for path in "${path_gtk_h[@]}"; do
+      path_gtk="${path_gtk_h[-1]%'gtk.h'}"
+      # Use the last gtk version that had gtkstock.h
+      #
+      if [[ -e "${path_gtk}gtkstock.h" ]]; then
+        echo $path_gtk'gtkstock.h'
+        break
+      elif [[ -e "${path_gtk}deprecated/gtkstock.h" ]]; then
+        echo $path_gtk'deprecated/gtkstock.h'
+        break
+      fi
+      unset -v 'path_gtk_h[-1]'
+    done
+    echo ''
 }
 
 get_duped_icons()
 {
-    path=$(get_path_gtk_includes)
-    slines=$( grep "#define GTK_STOCK" "${path}gtkstock.h" | grep -P -o '(?<=\")[^\"]+' - )
+    slines=$( grep "#define GTK_STOCK" "${gtkStock}" | grep -P -o '(?<=\")[^\"]+' - )
     sels=( ${slines} )
-
     for name in "${sels[@]}"; do
+      if [[ "${name}" != ')' ]]; then
         echo "$name $name "
+      fi
     done
 }
 
-dups=$( get_duped_icons )
-dupels=( $dups )
+gtkStock=$(get_path_gtk_stock)
 
-yad \
-    --title="GTK Icon Browser" \
-    --text="\
-Many stock items may be missing.  The
-missing icons will match the dialog icon." \
-    --center --borders=10 \
-    --height=600 \
-    --list \
-    --column="Image":IMG \
-    --column="Name":TXT \
-    $dups
+if [[ -z $gtkStock ]]; then
+  dups=$( get_duped_icons )
+  dupels=( $dups )
 
+
+  yad \
+      --title="GTK Icon Browser" \
+      --text="\
+  Many stock items may be missing.
+
+  The missing icons will match the dialog icon.
+
+  Using [$gtkStock]
+  " \
+      --center --borders=10 \
+      --height=600 \
+      --list \
+      --column="Image":IMG \
+      --column="Name":TXT \
+      $dups
+else
+  yad \
+      --title="GTK Icon Browser" \
+      --text="\
+Notice: 'gtkstock.h' has been completely deprecated and no longer exists as of 'gtk-4.0'
+
+  " \
+      --text-width=75 \
+      --center --borders=10 \
+      --height=40 \
+      --button=yad-quit
+fi
