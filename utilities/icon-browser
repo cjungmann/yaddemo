@@ -34,7 +34,7 @@ get_duped_icons()
 
 gtkStock=$(get_path_gtk_stock)
 
-if [[ -z $gtkStock ]]; then
+if [[ -n $gtkStock ]]; then
   dups=$( get_duped_icons )
   dupels=( $dups )
 
